@@ -26,7 +26,7 @@ setup_email () {
   echo "What is the gmail username?"
   read gmail_user
   echo "What is the gmail password?"
-  read gmail_pwd
+  read -s gmail_pwd
   echo "What is the destination address?"
   read destination_email
   echo "*.google.com:$gmail_user:$gmail_pwd" >> /etc/exim4/passwd.client
@@ -109,7 +109,7 @@ setup_system () {
   [ $? != 0 ] && return
   echo "Updating and preparing system"
   apt-get update
-  apt-get -y install sudo git rpl psmisc rsync nano cron
+  apt-get -y install sudo git rpl psmisc rsync nano cron dialog
   usermod -a -G sudo $1
   rpl jessie testing /etc/apt/sources.list
   rpl stretch testing /etc/apt/sources.list
