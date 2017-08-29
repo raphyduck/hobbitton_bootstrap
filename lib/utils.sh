@@ -103,7 +103,6 @@ setup_syncthing () {
   rpl '<gui enabled="true" tls="false"' '<gui enabled="true" tls="true"' /home/$1/.config/syncthing/config.xml
   awk '{gsub(/127\.0\.0\.1\:[0-9]{4}/,"0.0.0.0:8384")}1' /home/$1/.config/syncthing/config.xml > temp.txt && mv temp.txt /home/$1/.config/syncthing/config.xml && chown $1:$1 /home/$1/.config/syncthing/config.xml
   su $1 -c "./syncthing-linux-amd64-v0.14.36/syncthing > /dev/null 2>&1 &"
-  su $1 -c "rm -r ./syncthing-linux-amd64-v0.14.36*"
   cd $2
   echo "Now visit https://$HOSTNAME:8384 to configure syncthing"
   echo "Then press any key to resume the bootstrap..."
