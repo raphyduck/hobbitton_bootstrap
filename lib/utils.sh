@@ -69,7 +69,7 @@ setup_openvpn_server () {
   wait_for_file /home/$1/keys/server/openvpn_server.gw2.conf
   ln -s /home/$1/keys/server/openvpn_server.gw2.conf /etc/openvpn/server.conf
   rpl 'ProtectHome=true' '#ProtectHome=true' /lib/systemd/system/openvpn@.service
-  rpl 'LIMITNPROC=10' '#LIMITNPROC=10' /lib/systemd/system/openvpn@.service
+  rpl 'LimitNPROC=10=10' '#LimitNPROC=10=10' /lib/systemd/system/openvpn@.service
   echo 1 > /proc/sys/net/ipv4/ip_forward
   rpl '#net.ipv4.ip_forward=1' 'net.ipv4.ip_forward=1' /etc/sysctl.conf
   systemctl enable openvpn@server.service
