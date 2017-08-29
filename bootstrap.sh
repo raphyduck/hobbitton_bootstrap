@@ -16,10 +16,10 @@ cd $init_folder && init_folder=`pwd`
 . $init_folder/lib/utils.sh
 
 setup_hostname
+setup_syncthing "$user" "$init_folder"
 setup_user "$user" "$model" "$bs_folder"
 setup_system "$user"
 setup_ssh
-setup_syncthing "$user" "$init_folder"
 setup_crontab "$user" "$model" "$bs_folder"
 setup_iptables "$user" "$model" "$bs_folder"
 setup_email "$user"
