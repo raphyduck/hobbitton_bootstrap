@@ -114,12 +114,25 @@ setup_system () {
   [ $? != 0 ] && return
   echo "Updating and preparing system"
   apt-get update
-  apt-get -y install sudo git rpl psmisc rsync nano cron dialog htop
+  apt-get -y install sudo git rpl psmisc rsync nano cron dialog htop cron-apt
   usermod -a -G sudo $1
   rpl jessie testing /etc/apt/sources.list
   rpl stretch testing /etc/apt/sources.list
   echo "Updating system, can take a long time..."
   apt-get update; apt-get -y dist-upgrade; apt-get -y autoremove
+  echo 'MAILON="always"' >> /etc/cron-apt/config
+}
+
+setup_stunnel () {
+  setup_ask stunnel
+  [ $? != 0 ] && return
+  echo "Installing stunnel"
+  apt-get -y install stunnel4
+  cp /home/$1/$3/bootstrap.$2.conf /etc/stunnel/stunnel.conf
+  cp /home/$1/keys/priv/stunnel.pem /etc/stunnel/
+  rpl "ENABLED=0" "ENABLED=1" /etc/default/stunnel4
+  systemctl enable stunnel4.service
+  systemctl start stunnel4.service
 }
 
 setup_user () {
