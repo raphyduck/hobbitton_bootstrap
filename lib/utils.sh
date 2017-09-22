@@ -128,8 +128,8 @@ setup_stunnel () {
   [ $? != 0 ] && return
   echo "Installing stunnel"
   apt-get -y install stunnel4
-  cp /home/$1/$3/bootstrap.$2.conf /etc/stunnel/stunnel.conf
-  cp /home/$1/keys/priv/stunnel.pem /etc/stunnel/
+  cp /home/$1/$3/stunnel.$2.conf /etc/stunnel/stunnel.conf
+  cp /home/$1/keys/server/stunnel.pem /etc/stunnel/
   rpl "ENABLED=0" "ENABLED=1" /etc/default/stunnel4
   systemctl enable stunnel4.service
   systemctl start stunnel4.service
