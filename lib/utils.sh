@@ -14,8 +14,8 @@ setup_crontab () {
   setup_ask crontab
   [ $? != 0 ] && return
   echo "Setting up crontab"
-  wait_for_file /home/$1/$3/bootstrap/$2.crontab.$1
-  su $1 -c "cat /home/$1/$3/bootstrap/$2.crontab.$1 | sort - | uniq - | crontab -"
+  wait_for_file /home/$1/$3/bootstrap/$2.$1.crontab
+  su $1 -c "cat /home/$1/$3/bootstrap/$2.$1.crontab | sort - | uniq - | crontab -"
 }
 
 setup_email () {
@@ -83,8 +83,8 @@ setup_ssh () {
   rpl 'PermitRootLogin yes' 'PermitRootLogin no' /etc/ssh/sshd_config
   systemctl restart sshd.service
   mkdir /home/$1/.ssh
-  wait_for_file /home/$1/$3/bootstrap/authorized_keys.$2
-  cat "/home/$1/$3/bootstrap/authorized_keys.$2" >> /home/$1/.ssh/authorized_keys
+  wait_for_file /home/$1/$3/bootstrap/$2.$1.authorized_keys
+  cat "/home/$1/$3/bootstrap/$2.$1.authorized_keys" >> /home/$1/.ssh/authorized_keys
   chown $1:$1 /home/$1/.ssh/authorized_keys
   chmod 600 /home/$1/.ssh/authorized_keys
 }
@@ -128,7 +128,8 @@ setup_stunnel () {
   [ $? != 0 ] && return
   echo "Installing stunnel"
   apt-get -y install stunnel4
-  cp /home/$1/$3/stunnel.$2.conf /etc/stunnel/stunnel.conf
+  wait_for_file /home/$1/$3/$2.stunnel.conf
+  cp /home/$1/$3/$2.stunnel.conf /etc/stunnel/stunnel.conf
   cp /home/$1/keys/server/stunnel.pem /etc/stunnel/
   rpl "ENABLED=0" "ENABLED=1" /etc/default/stunnel4
   systemctl enable stunnel4.service
