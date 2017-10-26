@@ -1,5 +1,7 @@
 #!/bin/bash
 
+install_command="apt-get -y install"
+
 setup_ask () {
   echo "Do you want to setup $1? (y/n)"
   read answer
@@ -40,6 +42,14 @@ setup_email () {
   exim4 -qff
 }
 
+setup_flexget () {
+  setup_ask "flexget daemon"
+  [ $? != 0 ] && return
+  $install_command python python-pip
+  pip install --upgrade setuptools
+  pip install flexget
+}
+
 setup_hostname () {
   setup_ask hostname
   [ $? != 0 ] && return
@@ -65,7 +75,7 @@ setup_openvpn_server () {
   setup_ask "openvpn server"
   [ $? != 0 ] && return
   echo "Setting up OpenVPN server"
-  apt-get -y install openvpn
+  $install_command openvpn
   wait_for_file /home/$1/keys/server/openvpn_server.gw2.conf
   ln -s /home/$1/keys/server/openvpn_server.gw2.conf /etc/openvpn/server.conf
   rpl 'ProtectHome=true' '#ProtectHome=true' /lib/systemd/system/openvpn@.service
@@ -114,20 +124,22 @@ setup_system () {
   [ $? != 0 ] && return
   echo "Updating and preparing system"
   apt-get update
-  apt-get -y install sudo git rpl psmisc rsync nano cron dialog htop cron-apt
+  $install_command sudo git rpl psmisc rsync nano cron dialog htop cron-apt
   usermod -a -G sudo $1
   rpl jessie testing /etc/apt/sources.list
   rpl stretch testing /etc/apt/sources.list
   echo "Updating system, can take a long time..."
   apt-get update; apt-get -y dist-upgrade; apt-get -y autoremove
   echo 'MAILON="always"' >> /etc/cron-apt/config
+  rpl '* * *' '* * 1' /etc/cron.d/cron-apt
+  rpl 'Every night' 'Every week' /etc/cron.d/cron-apt
 }
 
 setup_stunnel () {
   setup_ask stunnel
   [ $? != 0 ] && return
   echo "Installing stunnel"
-  apt-get -y install stunnel4
+  $install_command stunnel4
   wait_for_file /home/$1/$3/$2.stunnel.conf
   cp /home/$1/$3/$2.stunnel.conf /etc/stunnel/stunnel.conf
   cp /home/$1/keys/server/stunnel.pem /etc/stunnel/

@@ -25,4 +25,5 @@ setup_iptables "$user" "$model" "$bs_folder"
 setup_email "$user"
 setup_openvpn_server "$user"
 setup_stunnel "$user" "$model" "$bs_folder"
+setup_flexget
 echo "All done, bye"
