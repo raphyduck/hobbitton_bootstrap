@@ -122,12 +122,18 @@ setup_syncthing () {
 setup_system () {
   setup_ask system
   [ $? != 0 ] && return
+  if [ "$2" == 't' ]
+  then
+    repo_type="testing"
+  else
+    repo_type="stable"
+  fi
   echo "Updating and preparing system"
   apt-get update
   $install_command sudo git rpl psmisc rsync nano cron dialog htop cron-apt
   usermod -a -G sudo $1
-  rpl jessie testing /etc/apt/sources.list
-  rpl stretch testing /etc/apt/sources.list
+  rpl jessie $repo_type /etc/apt/sources.list
+  rpl stretch $repo_type /etc/apt/sources.list
   echo "Updating system, can take a long time..."
   apt-get update; apt-get -y dist-upgrade; apt-get -y autoremove
   echo 'MAILON="always"' >> /etc/cron-apt/config

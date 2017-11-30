@@ -11,13 +11,15 @@ echo "What is the model system name?"
 read model
 echo "What is the bootstrap folder? (/home/$user/?)"
 read bs_folder
+echo "Do you want to use the (s)table or (t)esting repositories? (s/t)"
+read repo
 init_folder=`dirname "$0"`
 cd $init_folder && init_folder=`pwd`
 . $init_folder/lib/utils.sh
 
 setup_hostname
 setup_user "$user"
-setup_system "$user"
+setup_system "$user" "$repo"
 setup_syncthing "$user" "$init_folder"
 setup_ssh "$user" "$model" "$bs_folder"
 setup_crontab "$user" "$model" "$bs_folder"
