@@ -65,14 +65,13 @@ setup_kodi () {
   echo "Setting up Kodi media center"
   kodi_setting_folder=/home/$1/.kodi/userdata
   $install_command kodi lightdm
-  wait_for_file /home/$1/$3/bootstrap/advancedsettings.xml.kodi
-  wait_for_file /home/$1/$3/bootstrap/guisettings.xml.kodi
-  wait_for_file /home/$1/$3/bootstrap/sources.xml.kodi
+  wait_for_file /home/$1/$2/bootstrap/advancedsettings.xml.kodi
+  wait_for_file /home/$1/$2/bootstrap/guisettings.xml.kodi
+  wait_for_file /home/$1/$2/bootstrap/sources.xml.kodi
   mkdir $kodi_setting_folder
-  cp /home/$1/$3/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/
-  cp /home/$1/$3/bootstrap/guisettings.xml.kodi $kodi_setting_folder/
-  cp /home/$1/$3/bootstrap/sources.xml.kodi $kodi_setting_folder/
-  ln -s /home/$1/keys/server/openvpn_server.gw2.conf /etc/openvpn/server.conf
+  cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/
+  cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/
+  cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/
   rpl '#user-session=default' 'user-session=kodi' /etc/lightdm/lightdm.conf
   rpl '#autologin-user=' 'autologin-user=raph' /etc/lightdm/lightdm.conf
   rpl '#autologin-user-timeout=0' 'autologin-user-timeout=180' /etc/lightdm/lightdm.conf
