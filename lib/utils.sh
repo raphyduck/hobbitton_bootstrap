@@ -131,7 +131,7 @@ setup_syncthing () {
   sleep 90
   killall syncthing
   rpl '<gui enabled="true" tls="false"' '<gui enabled="true" tls="true"' /home/$1/.config/syncthing/config.xml
-  awk '{gsub(/127\.0\.0\.1\:[0-9]{4,5}/,"0.0.0.0:8384")}1' /home/$1/.config/syncthing/config.xml > temp.txt && mv temp.txt /home/$1/.config/syncthing/config.xml && chown $1:$1 /home/$1/.config/syncthing/config.xml
+  perl -p -i -e 's/127\.0\.0\.1\:[0-9]{4,5}/0.0.0.0:8384/g' /home/$1/.config/syncthing/config.xml
   su $1 -c "./syncthing-linux-amd64-v0.14.36/syncthing > /dev/null 2>&1 &"
   cd $2
   echo "Now visit https://$HOSTNAME:8384 to configure syncthing"
@@ -150,7 +150,7 @@ setup_system () {
   fi
   echo "Updating and preparing system"
   apt-get update
-  $install_command sudo git rpl psmisc rsync nano cron dialog htop cron-apt
+  $install_command sudo git rpl psmisc rsync nano cron dialog htop cron-apt perl
   usermod -a -G sudo $1
   rpl jessie $repo_type /etc/apt/sources.list
   rpl stretch $repo_type /etc/apt/sources.list
