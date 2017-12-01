@@ -69,9 +69,9 @@ setup_kodi () {
   wait_for_file /home/$1/$2/bootstrap/guisettings.xml.kodi
   wait_for_file /home/$1/$2/bootstrap/sources.xml.kodi
   mkdir -p $kodi_setting_folder
-  cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/
-  cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/
-  cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/
+  cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/advancedsettings.xml
+  cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/guisettings.xml
+  cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/sources.xml
   rpl '#user-session=default' 'user-session=kodi' /etc/lightdm/lightdm.conf
   rpl '#autologin-user=' 'autologin-user=raph' /etc/lightdm/lightdm.conf
   rpl '#autologin-user-timeout=0' 'autologin-user-timeout=180' /etc/lightdm/lightdm.conf
