@@ -68,7 +68,7 @@ setup_kodi () {
   wait_for_file /home/$1/$2/bootstrap/advancedsettings.xml.kodi
   wait_for_file /home/$1/$2/bootstrap/guisettings.xml.kodi
   wait_for_file /home/$1/$2/bootstrap/sources.xml.kodi
-  mkdir $kodi_setting_folder
+  mkdir -p $kodi_setting_folder
   cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/
   cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/
   cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/
@@ -135,7 +135,7 @@ setup_syncthing () {
   su $1 -c "./syncthing-linux-amd64-v0.14.36/syncthing > /dev/null 2>&1 &"
   cd $2
   echo "Now visit https://$HOSTNAME:8384 to configure syncthing"
-  echo "Then press any key to resume the bootstrap..."
+  echo "Then press 'Enter' to resume the bootstrap..."
   read waiting
 }
 
