@@ -169,7 +169,7 @@ setup_stunnel () {
   echo "Installing stunnel"
   $install_command stunnel4
   wait_for_file /home/$1/$3/bootstrap/$2.stunnel.conf
-  cp /home/$1/$3/$2.stunnel.conf /etc/stunnel/stunnel.conf
+  cp /home/$1/$3/bootstrap/$2.stunnel.conf /etc/stunnel/stunnel.conf
   cp /home/$1/keys/server/stunnel.pem /etc/stunnel/
   rpl "ENABLED=0" "ENABLED=1" /etc/default/stunnel4
   systemctl enable stunnel4.service
