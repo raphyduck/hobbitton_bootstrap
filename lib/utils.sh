@@ -69,9 +69,9 @@ setup_kodi () {
   wait_for_file /home/$1/$2/bootstrap/guisettings.xml.kodi
   wait_for_file /home/$1/$2/bootstrap/sources.xml.kodi
   mkdir -p $kodi_setting_folder
-  cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/advancedsettings.xml
-  cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/guisettings.xml
-  cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/sources.xml
+  su $1 -c "cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/advancedsettings.xml"
+  su $1 -c "cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/guisettings.xml"
+  su $1 -c "cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/sources.xml"
   rpl '#user-session=default' 'user-session=kodi' /etc/lightdm/lightdm.conf
   rpl '#autologin-user=' 'autologin-user=raph' /etc/lightdm/lightdm.conf
   rpl '#autologin-user-timeout=0' 'autologin-user-timeout=180' /etc/lightdm/lightdm.conf
@@ -85,6 +85,7 @@ setup_iptables () {
   echo "Setting iptables rules"
   wait_for_file /home/$1/$3/iptables/$2.iptables.sh
   wait_for_file /home/$1/$3/iptables/firewall_vars.sh
+  su $1 -c "ln -s /home/$1/powercloud/binaries /home/$1/bin"
   bash /home/$1/$3/iptables/$2.iptables.sh
   iptables-save > /etc/iptables.up.rules
   echo "#!/bin/sh
