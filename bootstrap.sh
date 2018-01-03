@@ -26,7 +26,7 @@ setup_crontab "$user" "$model" "$bs_folder"
 setup_iptables "$user" "$model" "$bs_folder"
 setup_email "$user"
 setup_kodi "$user" "$bs_folder"
-setup_openvpn_server "$user"
+setup_openvpn_server "$user" "$model"
 setup_stunnel "$user" "$model" "$bs_folder"
 setup_flexget
 echo "All done, bye"
