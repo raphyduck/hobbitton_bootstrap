@@ -84,6 +84,7 @@ setup_iptables () {
   [ $? != 0 ] && return
   echo "Setting iptables rules"
   wait_for_file /home/$1/$3/iptables/$2.iptables.sh
+  wait_for_file /home/$1/$3/iptables/firewall_vars.sh
   bash /home/$1/$3/iptables/$2.iptables.sh
   iptables-save > /etc/iptables.up.rules
   echo "#!/bin/sh
@@ -109,12 +110,12 @@ setup_openvpn_server () {
 setup_ssh () {
   setup_ask ssh
   [ $? != 0 ] && return
-  rpl '#PasswordAuthentication yes' 'PasswordAuthentication no' /etc/ssh/sshd_config
-  rpl 'PermitRootLogin yes' 'PermitRootLogin no' /etc/ssh/sshd_config
-  systemctl restart sshd.service
   mkdir /home/$1/.ssh
   wait_for_file /home/$1/$3/bootstrap/$2.$1.authorized_keys
   cat "/home/$1/$3/bootstrap/$2.$1.authorized_keys" >> /home/$1/.ssh/authorized_keys
+  rpl '#PasswordAuthentication yes' 'PasswordAuthentication no' /etc/ssh/sshd_config
+  rpl 'PermitRootLogin yes' 'PermitRootLogin no' /etc/ssh/sshd_config
+  systemctl restart sshd.service
   chown $1:$1 /home/$1/.ssh/authorized_keys
   chmod 600 /home/$1/.ssh/authorized_keys
 }
