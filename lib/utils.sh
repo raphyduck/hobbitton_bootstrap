@@ -24,6 +24,7 @@ setup_email () {
   setup_ask "email server"
   [ $? != 0 ] && return
   echo "Setting up email server"
+  $install_command exim4 exim4-config
   dpkg-reconfigure exim4-config
   echo "What is the gmail username?"
   read gmail_user
