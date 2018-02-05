@@ -26,17 +26,17 @@ setup_email () {
   echo "Setting up email server"
   $install_command exim4 exim4-config mailutils
   dpkg-reconfigure exim4-config
-  echo "What is the gmail username?"
-  read mail_user
-  echo "What is the gmail password?"
-  read -s mail_pwd
+  echo "What is the email username?"
+  read email_user
+  echo "What is the email password?"
+  read -s email_pwd
   echo "What is the destination address?"
   read destination_email
-  echo "*.hobbitton.at:$mail_user:$mail_pwd" >> /etc/exim4/passwd.client
-  echo "$1: $mail_user" >> /etc/email-addresses
-  echo "$1@localhost: $mail_user" >> /etc/email-addresses
-  echo "$1@hostname1: $mail_user" >> /etc/email-addresses
-  echo "$1@hostname1.localdomain: $mail_user" >> /etc/email-addresses
+  echo "*.hobbitton.at:$email_user:$email_pwd" >> /etc/exim4/passwd.client
+  echo "$1: $email_user" >> /etc/email-addresses
+  echo "$1@localhost: $email_user" >> /etc/email-addresses
+  echo "$1@hostname1: $email_user" >> /etc/email-addresses
+  echo "$1@hostname1.localdomain: $email_user" >> /etc/email-addresses
   echo "$1: $destination_email" >> /etc/aliases
   update-exim4.conf
   invoke-rc.d exim4 restart
