@@ -181,13 +181,16 @@ setup_system () {
     repo_type="stable"
   fi
   echo "Updating and preparing system"
-  apt-get update
+  $refresh_pkg_command
   $install_command sudo git rpl psmisc rsync nano cron dialog htop cron-apt perl
   usermod -a -G sudo $1
-  rpl jessie $repo_type /etc/apt/sources.list
-  rpl stretch $repo_type /etc/apt/sources.list
+  if [[ $DISTRO =~ .*debian.* ]]
+  then
+    rpl jessie $repo_type /etc/apt/sources.list
+    rpl stretch $repo_type /etc/apt/sources.list
+  fi
   echo "Updating system, can take a long time..."
-  apt-get update; apt-get -y dist-upgrade; apt-get -y autoremove
+  $refresh_pkg_command; apt-get -y dist-upgrade; apt-get -y autoremove
   echo 'MAILON="always"' >> /etc/cron-apt/config
   rpl '* * *' '* * 1' /etc/cron.d/cron-apt
   rpl 'Every night' 'Every week' /etc/cron.d/cron-apt
