@@ -17,6 +17,7 @@ init_folder=`dirname "$0"`
 cd $init_folder && init_folder=`pwd`
 . $init_folder/lib/utils.sh
 
+detect_distro
 setup_hostname
 setup_user "$user"
 setup_system "$user" "$repo"

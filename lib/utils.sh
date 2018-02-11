@@ -1,6 +1,29 @@
 #!/bin/bash
 
 install_command="apt-get -y install"
+refresh_pkg_command="apt-get update"
+
+add_software_repo () {
+  add-apt-repository "$1"
+}
+
+detect_distro () {
+  # Determine OS platform
+  UNAME=$(uname | tr "[:upper:]" "[:lower:]")
+  # If Linux, try to determine specific distribution
+  if [ "$UNAME" == "linux" ]; then
+      # If available, use LSB to identify distribution
+      if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
+          export DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | tr '[:upper:]' '[:lower:]')
+      # Otherwise, use release info file
+      else
+          export DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | tr '[:upper:]' '[:lower:]')
+      fi
+  fi
+  # For everything else (or if above failed), just use generic identifier
+  [ "$DISTRO" == "" ] && export DISTRO=$UNAME
+  unset UNAME
+}
 
 setup_ask () {
   echo "Do you want to setup $1? (y/n)"
@@ -65,11 +88,17 @@ setup_kodi () {
   [ $? != 0 ] && return
   echo "Setting up Kodi media center"
   kodi_setting_folder=/home/$1/.kodi/userdata
+  if [[ $DISTRO =~ .*ubuntu.* ]]
+  then
+    $install_command software-properties-common
+    add_software_repo ppa:team-xbmc/ppa
+    $refresh_pkg_command
+  fi
   $install_command kodi lightdm
   wait_for_file /home/$1/$2/bootstrap/advancedsettings.xml.kodi
   wait_for_file /home/$1/$2/bootstrap/guisettings.xml.kodi
   wait_for_file /home/$1/$2/bootstrap/sources.xml.kodi
-  mkdir -p $kodi_setting_folder
+  su $1 -c "mkdir -p $kodi_setting_folder"
   su $1 -c "cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/advancedsettings.xml"
   su $1 -c "cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/guisettings.xml"
   su $1 -c "cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/sources.xml"
