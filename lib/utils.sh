@@ -25,6 +25,21 @@ detect_distro () {
   unset UNAME
 }
 
+settings_replace () {
+  if [ ! -z `grep -r "#$2" "$1"` ]
+  then
+    rpl "#$2" "$3" "$1"
+  elif [ ! -z `grep -r "$2" "$1"` ]
+  then
+    rpl "$2" "$3" "$1"
+  else
+    if [ -z `grep -r "$3" "$1"` ]
+    then
+    echo "$3" >> "$1"
+    fi
+  fi
+}
+
 setup_ask () {
   echo "Do you want to setup $1? (y/n)"
   read answer
@@ -102,10 +117,10 @@ setup_kodi () {
   su $1 -c "cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/advancedsettings.xml"
   su $1 -c "cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/guisettings.xml"
   su $1 -c "cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/sources.xml"
-  rpl '#user-session=default' 'user-session=kodi' /etc/lightdm/lightdm.conf
-  rpl '#autologin-user=' 'autologin-user=raph' /etc/lightdm/lightdm.conf
-  rpl '#autologin-user-timeout=0' 'autologin-user-timeout=180' /etc/lightdm/lightdm.conf
-  rpl '#autologin-session=' 'autologin-session=kodi' /etc/lightdm/lightdm.conf
+  settings_replace "/etc/lightdm/lightdm.conf" '#user-session=default' 'user-session=kodi'
+  settings_replace "/etc/lightdm/lightdm.conf" '#autologin-user=' 'autologin-user=raph'
+  settings_replace "/etc/lightdm/lightdm.conf" '#autologin-user-timeout=0' 'autologin-user-timeout=180'
+  settings_replace "/etc/lightdm/lightdm.conf" '#autologin-session=' 'autologin-session=kodi'
   systemctl restart lightdm
 }
 
