@@ -29,5 +29,5 @@ setup_email "$user"
 setup_kodi "$user" "$bs_folder"
 setup_openvpn_server "$user" "$model"
 setup_stunnel "$user" "$model" "$bs_folder"
-setup_flexget
+setup_searx "$user" "$bs_folder"
 echo "All done, bye"

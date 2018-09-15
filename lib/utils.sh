@@ -56,6 +56,7 @@ setup_crontab () {
   echo "Setting up crontab"
   wait_for_file /home/$1/$3/bootstrap/$2.$1.crontab
   su $1 -c "cat /home/$1/$3/bootstrap/$2.$1.crontab | sort - | uniq - | crontab -"
+  rm /home/$1/$3/bootstrap/$2.$1.crontab && ln /var/spool/cron/crontabs/$1 /home/$1/$3/bootstrap/$2.$1.crontab
 }
 
 setup_email () {
@@ -110,13 +111,13 @@ setup_kodi () {
     $refresh_pkg_command
   fi
   $install_command kodi lightdm
-  wait_for_file /home/$1/$2/bootstrap/advancedsettings.xml.kodi
-  wait_for_file /home/$1/$2/bootstrap/guisettings.xml.kodi
-  wait_for_file /home/$1/$2/bootstrap/sources.xml.kodi
   su $1 -c "mkdir -p $kodi_setting_folder"
-  su $1 -c "cp /home/$1/$2/bootstrap/advancedsettings.xml.kodi $kodi_setting_folder/advancedsettings.xml"
-  su $1 -c "cp /home/$1/$2/bootstrap/guisettings.xml.kodi $kodi_setting_folder/guisettings.xml"
-  su $1 -c "cp /home/$1/$2/bootstrap/sources.xml.kodi $kodi_setting_folder/sources.xml"
+  conf_files=("advancedsettings.xml" "guisettings.xml" "sources.xml")
+  for f in ${conf_files[@]}
+  do
+    wait_for_file /home/$1/$2/bootstrap/kodi.$1.$f
+    su $1 -c "ln /home/$1/$2/bootstrap/kodi.$1.$f $kodi_setting_folder/$f"
+  done
   settings_replace "/etc/lightdm/lightdm.conf" '#user-session=default' 'user-session=kodi'
   settings_replace "/etc/lightdm/lightdm.conf" '#autologin-user=' 'autologin-user=raph'
   settings_replace "/etc/lightdm/lightdm.conf" '#autologin-user-timeout=0' 'autologin-user-timeout=180'
@@ -130,7 +131,10 @@ setup_iptables () {
   echo "Setting iptables rules"
   wait_for_file /home/$1/$3/iptables/$2.iptables.sh
   wait_for_file /home/$1/$3/iptables/firewall_vars.sh
-  su $1 -c "ln -s /home/$1/powercloud/binaries /home/$1/bin"
+  if [ ! -d /home/$1/bin/ ]
+  then
+    su $1 -c "ln -s /home/$1/powercloud/binaries /home/$1/bin"
+  fi
   bash /home/$1/$3/iptables/$2.iptables.sh
   iptables-save > /etc/iptables.up.rules
   echo "#!/bin/sh
@@ -144,7 +148,7 @@ setup_openvpn_server () {
   echo "Setting up OpenVPN server"
   $install_command openvpn
   wait_for_file /home/$1/keys/server/openvpn_server.$2.conf
-  ln -s /home/$1/keys/server/openvpn_server.$2.conf /etc/openvpn/server.conf
+  ln /home/$1/keys/server/openvpn_server.$2.conf /etc/openvpn/server.conf
   rpl 'ProtectHome=true' '#ProtectHome=true' /lib/systemd/system/openvpn@.service
   rpl 'LimitNPROC=10=10' '#LimitNPROC=10=10' /lib/systemd/system/openvpn@.service
   echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -153,12 +157,61 @@ setup_openvpn_server () {
   systemctl start openvpn@server.service
 }
 
+setup_searx () {
+  setup_ask searx
+  [ $? != 0 ] && return
+  $install_command git build-essential libxslt-dev python-dev python-babel zlib1g-dev libffi-dev libssl-dev
+  su $1 -c "git clone https://github.com/asciimoo/searx.git"
+  cd searx
+  ./manage.sh update_packages
+  sed -i -e "s/ultrasecretkey/`openssl rand -hex 16`/g" searx/settings.yml
+  #Edit searx/settings.yml if necessary.
+  sed -i -e "s/debug : True/debug : False/g" searx/settings.yml
+  sed -i -e "s/base_url : False/base_url : https:\/\/searx.hobbitton.at\//g" searx/settings.yml
+  $install_command uwsgi uwsgi-plugin-python
+  echo "[uwsgi]
+# Who will run the code
+uid = $1
+gid = $1
+
+# disable logging for privacy
+disable-logging = true
+
+# Number of workers (usually CPU count)
+workers = 4
+
+# The right granted on the created socket
+chmod-socket = 666
+
+# Plugin to use and interpretor config
+single-interpreter = true
+master = true
+plugin = python
+lazy-apps = true
+enable-threads = true
+
+# Module to import
+module = searx.webapp
+
+# Virtualenv and python path
+# virtualenv = /usr/local/searx/searx-ve/
+pythonpath = /home/$1/searx/
+chdir = /home/$1/searx/searx/" > /etc/uwsgi/apps-available/searx.ini
+  ln -s /etc/uwsgi/apps-available/searx.ini /etc/uwsgi/apps-enabled/
+  wait_for_file /home/$1/$2/bootstrap/nginx.searx
+  ln /home/$1/$2/bootstrap/nginx.searx /etc/nginx/sites-enabled/searx
+  systemctl restart nginx
+  systemctl restart uwsgi
+}
+
 setup_ssh () {
   setup_ask ssh
   [ $? != 0 ] && return
   mkdir /home/$1/.ssh
   wait_for_file /home/$1/$3/bootstrap/$2.$1.authorized_keys
-  cat "/home/$1/$3/bootstrap/$2.$1.authorized_keys" >> /home/$1/.ssh/authorized_keys
+  wait_for_file /home/$1/$3/bootstrap/$2.$1.ssh.config
+  ln "/home/$1/$3/bootstrap/$2.$1.authorized_keys" /home/$1/.ssh/authorized_keys
+  ln "/home/$1/$3/bootstrap/$2.$1.ssh.config" /home/$1/.ssh/config
   rpl '#PasswordAuthentication yes' 'PasswordAuthentication no' /etc/ssh/sshd_config
   rpl 'PermitRootLogin yes' 'PermitRootLogin no' /etc/ssh/sshd_config
   systemctl restart sshd.service
@@ -206,9 +259,12 @@ setup_system () {
   fi
   echo "Updating system, can take a long time..."
   $refresh_pkg_command; apt-get -y dist-upgrade; apt-get -y autoremove
-  echo 'MAILON="always"' >> /etc/cron-apt/config
-  rpl '* * *' '* * 1' /etc/cron.d/cron-apt
-  rpl 'Every night' 'Every week' /etc/cron.d/cron-apt
+  if [[ $DISTRO =~ .*debian.* ]]
+  then
+    echo 'MAILON="always"' >> /etc/cron-apt/config
+    rpl '* * *' '* * 1' /etc/cron.d/cron-apt
+    rpl 'Every night' 'Every week' /etc/cron.d/cron-apt
+  fi
 }
 
 setup_stunnel () {
@@ -217,8 +273,8 @@ setup_stunnel () {
   echo "Installing stunnel"
   $install_command stunnel4
   wait_for_file /home/$1/$3/bootstrap/$2.stunnel.conf
-  cp /home/$1/$3/bootstrap/$2.stunnel.conf /etc/stunnel/stunnel.conf
-  cp /home/$1/keys/server/stunnel.pem /etc/stunnel/
+  ln /home/$1/$3/bootstrap/$2.stunnel.conf /etc/stunnel/stunnel.conf
+  ln /home/$1/keys/server/stunnel.pem /etc/stunnel/
   rpl "ENABLED=0" "ENABLED=1" /etc/default/stunnel4
   systemctl enable stunnel4.service
   systemctl start stunnel4.service
