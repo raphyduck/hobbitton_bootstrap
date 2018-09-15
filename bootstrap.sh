@@ -23,7 +23,6 @@ setup_user "$user"
 setup_system "$user" "$repo"
 setup_syncthing "$user" "$init_folder"
 setup_bitpocket "$user" "$model" "$bs_folder"
-#TODO: Need to setup bitpocket https://github.com/sickill/bitpocket/blob/master/bin/bitpocket
 setup_ssh "$user" "$model" "$bs_folder"
 setup_crontab "$user" "$model" "$bs_folder"
 setup_iptables "$user" "$model" "$bs_folder"
