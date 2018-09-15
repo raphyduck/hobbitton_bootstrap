@@ -50,6 +50,39 @@ setup_ask () {
   return 0
 }
 
+setup_bitpocket () {
+  setup_ask bitpocket
+  [ $? != 0 ] && return
+  echo "Setting up bitpocket..."
+  cd /home/$1/
+  su $1 -c "git clone git://github.com/sickill/bitpocket.git"
+  bpk_cmd="/home/$1/bitpocket/bin/bitpocket"
+  echo "You need to setup the first bootstrap folder"
+  echo "Please enter the path to where you want the bootstrap folder to be: "
+  read bs_folder
+  su $1 -c "mkdir -p $bs_folder"
+  cd $bs_folder
+  echo "Please enter the remote host: "
+  read remote_host
+  su $1 -c "$bpk_cmd init $remote_host $bs_folder"
+  echo "You now need to modify the bitpocket config file. Press any touch to continue..."
+  read waiting
+  su $1 -c "nano .bitpocket/config"
+  echo "Lunching synchronisation of the folder, it can take a long time..."
+  su $1 -c "$bpk_cmd sync"
+  cd /home/$1
+  for i in /home/$1/$3/bootstrap/$2.$1.bitpocket.*
+  do
+    f=$(echo $i | sed "s/\/home\/$1\/$3\/bootstrap\/desktop\.raph\.bitpocket\.config\.//" | sed 's/\./\//g')
+    su $1 -c "mkdir -p $f/.bitpocket"
+    if [ -f "$f/config" ]
+    then
+      rm "$f/config"
+    fi
+    su $1 -c "ln $i $f/config"
+  done
+}
+
 setup_crontab () {
   setup_ask crontab
   [ $? != 0 ] && return
