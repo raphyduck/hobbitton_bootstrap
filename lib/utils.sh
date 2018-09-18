@@ -55,7 +55,7 @@ setup_bitpocket () {
   [ $? != 0 ] && return
   echo "Setting up bitpocket..."
   cd /home/$1/
-  su $1 -c "git clone git://github.com/sickill/bitpocket.git"
+  su $1 -c "git clone git://github.com/raphyduck/bitpocket.git"
   bpk_cmd="/home/$1/bitpocket/bin/bitpocket"
   echo "You need to setup the first bootstrap folder"
   echo "Please enter the path to where you want the bootstrap folder to be: "
