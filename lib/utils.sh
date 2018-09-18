@@ -72,7 +72,7 @@ setup_bitpocket () {
   read waiting
   echo "Launching synchronisation of the folder, it can take a long time..."
   sudo -u $1 $bpk_cmd sync
-  file=/home/$1/$3/bootstrap/$2.$1.bitpocket.$(echo $bs_folder | sed "s#$HOME##" | sed 's/\//./g' | sed 's/\.$//' | sed 's/\.\+//g'))
+  file=/home/$1/$3/bootstrap/$2.$1.bitpocket.$(echo $bs_folder | sed "s#$HOME##" | sed 's/\//./g' | sed 's/\.$//' | sed 's/\.\+//g')
   if [ ! -f "$file" ]
   then
     su $1 -c "ln $bs_folder/.bitpocket/config $file"
