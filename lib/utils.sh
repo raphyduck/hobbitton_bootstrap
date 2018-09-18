@@ -70,19 +70,29 @@ setup_bitpocket () {
   su $1 -c "nano .bitpocket/config"
   echo "You need to ensure the machine has the necessary SSH key in $HOME/.ssh. Press any touch when ready to continue..."
   read waiting
-  echo "Lunching synchronisation of the folder, it can take a long time..."
+  echo "Launching synchronisation of the folder, it can take a long time..."
   sudo -u $1 $bpk_cmd sync
+  file=/home/$1/$3/bootstrap/$2.$1.bitpocket.$(echo $bs_folder | sed "s#$HOME##" | sed 's/\//./g' | sed 's/\.$//' | sed 's/\.\+//g'))
+  if [ ! -f "$file" ]
+  then
+    su $1 -c "ln $bs_folder/.bitpocket/config $file"
+  fi
   cd /home/$1
   for i in /home/$1/$3/bootstrap/$2.$1.bitpocket.*
   do
-    f=$(echo $i | sed "s/\/home\/$1\/$3\/bootstrap\/desktop\.raph\.bitpocket\.config\.//" | sed 's/\./\//g')
-    su $1 -c "mkdir -p $f/.bitpocket"
-    if [ -f "$f/config" ]
+    if [ "$i" == "/home/$1/$3/bootstrap/$2.$1.bitpocket.*" ]
     then
-      rm "$f/config"
+      continue
     fi
-    su $1 -c "ln $i $f/config"
+    f=$HOME/$(echo $i | sed "s/\/home\/$1\/$3\/bootstrap\/$2\.$1\.bitpocket\.config\.//" | sed 's/\./\//g')
+    su $1 -c "mkdir -p $f/.bitpocket"
+    if [ -f "$f/.bitpocket/config" ]
+    then
+      rm "$f/.bitpocket/config"
+    fi
+    su $1 -c "ln $i $f/.bitpocket/config"
   done
+  rm /home/$1/bitpocket
 }
 
 setup_crontab () {
