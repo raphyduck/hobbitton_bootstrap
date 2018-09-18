@@ -92,7 +92,7 @@ setup_bitpocket () {
     fi
     su $1 -c "ln $i $f/.bitpocket/config"
   done
-  rm /home/$1/bitpocket
+  rm -r /home/$1/bitpocket
 }
 
 setup_crontab () {
