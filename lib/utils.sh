@@ -71,7 +71,7 @@ setup_bitpocket () {
   echo "You need to ensure the machine has the necessary SSH key in $HOME/.ssh. Press any touch when ready to continue..."
   read waiting
   echo "Lunching synchronisation of the folder, it can take a long time..."
-  su $1 --session-command "$bpk_cmd sync"
+  sudo -u $1 "$bpk_cmd sync"
   cd /home/$1
   for i in /home/$1/$3/bootstrap/$2.$1.bitpocket.*
   do
