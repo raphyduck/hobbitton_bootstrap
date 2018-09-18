@@ -68,6 +68,8 @@ setup_bitpocket () {
   echo "You now need to modify the bitpocket config file. Press any touch to continue..."
   read waiting
   su $1 -c "nano .bitpocket/config"
+  echo "You need to ensure the machine has the necessary SSH key in $HOME/.ssh. Press any touch when ready to continue..."
+  read waiting
   echo "Lunching synchronisation of the folder, it can take a long time..."
   su $1 -c "$bpk_cmd sync"
   cd /home/$1
